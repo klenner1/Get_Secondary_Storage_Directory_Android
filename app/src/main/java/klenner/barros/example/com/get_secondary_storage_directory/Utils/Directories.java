@@ -18,32 +18,29 @@ public class Directories {
     public static String getSecondaryStoreDir(Context context) {
         String secStore = null;
         try {
-            for (String sdPath : sdCardPossiblePath) {
-                File file = new File("/mnt/", sdPath);
-                if (file.exists() && file.isDirectory() && file.canWrite()) {
-                    try {
-                        secStore = file.getAbsolutePath();
-                    }catch (Exception e){
-                        Log.e("",e.getMessage(),e);
-                        secStore=null;
+            File[] externalFilesDirs = context.getExternalFilesDirs(null);
+            if (externalFilesDirs != null && externalFilesDirs.length > 1 && externalFilesDirs[1] != null) {
+                secStore = externalFilesDirs[1].getAbsolutePath();
+                secStore=secStore.split("Android")[0];
+            } if (secStore==null) {
+                for (String sdPath : sdCardPossiblePath) {
+                    File file = new File("/mnt/", sdPath);
+                    if (file.exists() && file.isDirectory() && file.canWrite()) {
+                        try {
+                            secStore = file.getAbsolutePath();
+                        }catch (Exception e){
+                            Log.e("",e.getMessage(),e);
+                            secStore=null;
+                        }
                     }
-
                 }
-            }
-            if (secStore==null) {
-                File[] externalFilesDirs = context.getExternalFilesDirs(null);
-                if (externalFilesDirs != null && externalFilesDirs.length > 1 && externalFilesDirs[1] != null) {
-                    secStore = externalFilesDirs[1].getAbsolutePath();
-                    secStore=secStore.split("Android")[0];
+                if (secStore == null) {
+                    secStore = System.getenv("SECONDARY_STORAGE");
                 }
-            }
-            if (secStore == null) {
-                secStore = System.getenv("SECONDARY_STORAGE");
             }
         }catch (Exception e){
             Log.e("",e.getMessage(),e);
         }
         return secStore;
     }
-
 }
